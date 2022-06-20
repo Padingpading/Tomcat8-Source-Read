@@ -66,8 +66,9 @@ public final class Bootstrap {
      * 守护进程在init的时候被自身设置.设置了一系列的ClassLoader。
      */
     private static volatile Bootstrap daemon = null;
-
+    //tomcat根目录
     private static final File catalinaBaseFile;
+    //项目目录
     private static final File catalinaHomeFile;
 
     private static final Pattern PATH_PATTERN = Pattern.compile("(\".*?\")|(([^,])*)");
