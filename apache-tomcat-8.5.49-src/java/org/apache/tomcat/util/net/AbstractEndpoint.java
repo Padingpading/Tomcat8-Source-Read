@@ -69,7 +69,7 @@ public abstract class AbstractEndpoint<S> {
      */
     public static interface Handler<S> {
 
-        /**
+        /**socket的状态
          * Different types of socket states to react upon.
          */
         public enum SocketState {
@@ -447,7 +447,7 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**
+    /**轮询socket的线程。
      * Acceptor thread count.
      * 用一个线程就足够。
      */

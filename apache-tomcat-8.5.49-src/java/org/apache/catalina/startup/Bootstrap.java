@@ -58,7 +58,7 @@ public final class Bootstrap {
 
     private static final Log log = LogFactory.getLog(Bootstrap.class);
 
-    /**
+    /**main方法启动锁
      * Daemon object used by main.
      */
     private static final Object daemonLock = new Object();
@@ -76,8 +76,9 @@ public final class Bootstrap {
 
      * 1.静态代码块儿在类中的加载顺序。详见深入理解JVM。
      *  1.1 获取bin目录的绝对路径。
-     *  1.2.设置安装目录的路径。
-     *  1.3.设置工作目录的路径。
+     *  1.2.设置安装目录的路径。catalina.home指向公用信息的位置，就是bin和lib的父目录。
+     *  1.3.设置工作目录的路径。catalina.base指向每个Tomcat目录私有信息的位置，就是conf、logs、temp、webapps和work的父目录。
+     * 仅运行一个Tomcat实例时，这两个属性指向的位置是相同的。
      * 也就是启动参数中的参数设置：
      *  -Dcatalina.home=catalina-home   //安装目录。
      *  -Dcatalina.base=catalina-home   //工作目录。
@@ -103,7 +104,7 @@ public final class Bootstrap {
         if (home != null) {
             File f = new File(home);
             try {
-                homeFile = f.getCanonicalFile();
+                homeFile =  f.getCanonicalFile();
             } catch (IOException ioe) {
                 homeFile = f.getAbsoluteFile();
             }
@@ -151,7 +152,7 @@ public final class Bootstrap {
             } catch (IOException ioe) {
                 baseFile = baseFile.getAbsoluteFile();
             }
-            catalinaBaseFile = baseFile;
+             catalinaBaseFile = baseFile;
         }
         System.setProperty(
                 Globals.CATALINA_BASE_PROP, catalinaBaseFile.getPath());
@@ -201,6 +202,7 @@ public final class Bootstrap {
     private void initClassLoaders() {
         try {
             //置空  目的：打破双亲委派模型机制。因为浪费性能。
+            //加载:CATLINAL_HOME/lib下的包。
             commonLoader = createClassLoader("common", null);
             if (commonLoader == null) {
                 // no config file, default to this loader - we might be in a 'single' env.
@@ -235,11 +237,11 @@ public final class Bootstrap {
      */
     private ClassLoader createClassLoader(String name, ClassLoader parent)
             throws Exception {
-
+        //加载的包"${catalina.base}/lib","${catalina.base}/lib/*.jar","${catalina.home}/lib","${catalina.home}/lib/*.jar"
         String value = CatalinaProperties.getProperty(name + ".loader");
         if ((value == null) || (value.equals("")))
             return parent;
-
+        //占位符替换,替换为绝对轮
         value = replace(value);
 
         List<Repository> repositories = new ArrayList<>();
@@ -347,8 +349,8 @@ public final class Bootstrap {
         String methodName = "setParentClassLoader";
         Class<?> paramTypes[] = new Class[1];
         paramTypes[0] = Class.forName("java.lang.ClassLoader");
-        Object paramValues[] = new Object[1];
-        paramValues[0] = sharedLoader;
+        Object paramValues[] = new Object [1];
+         paramValues[0] = sharedLoader;
         /**
          * 反射执行对应setParentClassLoader方法。
          * 详见{@link Catalina#setParentClassLoader(ClassLoader)}
@@ -545,7 +547,7 @@ public final class Bootstrap {
      * 通过提供的脚本去执行入口方法.这是启动tomcat的入口。
      * @param args Command line arguments to be processed
      */
-    public static void main(String args[]) {
+     public static void main(String args[]) {
         log.info("current your machine time is : " + LogConstantForCode.CURRENT_LOCAL_DATE);
         //断点可以在这儿打一个。
         synchronized (daemonLock) {
@@ -592,7 +594,7 @@ public final class Bootstrap {
                  * 并将Catalina.await设置为true.{@link Catalina#await()}
                  * 目的：在关闭窗口阻塞住监听关闭。将线程阻塞住。
                  * {@link Catalina#load()}
-                 * Catalina.setAwait, Catalina.load, Catalina.start()。。。。。
+                 * Catalina.se tAwait, Catalina.load, Catalina.start()。。。。。
                  */
                 daemon.setAwait(true);
                 daemon.load(args);

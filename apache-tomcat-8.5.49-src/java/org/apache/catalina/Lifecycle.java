@@ -146,13 +146,13 @@ public interface Lifecycle {
     public static final String BEFORE_DESTROY_EVENT = "before_destroy";
 
 
-    /**
+    /**周期性事件,热部署。(后台线程定时执行时间)
      * The LifecycleEvent type for the "periodic" event.
      */
     public static final String PERIODIC_EVENT = "periodic";
 
 
-    /**
+    /**配置前
      * The LifecycleEvent type for the "configure_start" event. Used by those
      * components that use a separate component to perform configuration and
      * need to signal when configuration should be performed - usually after
@@ -161,7 +161,7 @@ public interface Lifecycle {
     public static final String CONFIGURE_START_EVENT = "configure_start";
 
 
-    /**
+    /**配置后
      * The LifecycleEvent type for the "configure_stop" event. Used by those
      * components that use a separate component to perform configuration and
      * need to signal when de-configuration should be performed - usually after
@@ -173,7 +173,7 @@ public interface Lifecycle {
     // --------------------------------------------------------- Public Methods
 
 
-    /**
+    /**添加高
      * Add a LifecycleEvent listener to this component.
      *
      * @param listener The listener to add

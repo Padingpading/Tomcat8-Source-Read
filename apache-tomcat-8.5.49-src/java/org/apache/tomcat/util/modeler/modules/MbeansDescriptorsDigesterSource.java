@@ -146,7 +146,7 @@ public class MbeansDescriptorsDigesterSource extends ModelerSource
         setRegistry(registry);
         setSource(source);
         execute();
-        return mbeans;
+         return mbeans;
     }
 
     public void execute() throws Exception {

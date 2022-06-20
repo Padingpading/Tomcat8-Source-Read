@@ -59,8 +59,6 @@ public abstract class LifecycleBase implements Lifecycle {
      * 而且state字段加了对应的volatile关键字。
      * 关于synchronized以及volatile关键字请去阅读并发相关书籍进行自我积累。
      */
-
-
     private static final Log log = LogFactory.getLog(LifecycleBase.class);
 
     /**
@@ -70,9 +68,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
 
     /**
-     * The list of registered LifecycleListeners for event notifications.
      * 生命周期监听类的集合。 线程安全的List集合。基于copy and new and set.
-     *
      * 非常重要的数据结构,添加，删除，遍历对应容器的监听器。
      * 并添加对应的监听事件(LifecycleEvent)和子类触发对应的监听事件。
      */
@@ -145,11 +141,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
 
     /**
-     * Allow sub classes to fire {@link Lifecycle} events.
      * 允许子类去触发对应的生命周期事件。(Spring的)
-     * @param type  Event type
-     * @param data  Data associated with event.
-     *
      *  相应所有的config_start事件。包括最重要的ContextConfig 类。
      */
     protected void fireLifecycleEvent(String type, Object data) {
@@ -174,7 +166,7 @@ public abstract class LifecycleBase implements Lifecycle {
              * 比如{@link LifecycleMBeanBase#initInternal()}等等。
              */
             initInternal();
-            setStateInternal(LifecycleState.INITIALIZED, null, false);
+                   setStateInternal(LifecycleState.INITIALIZED, null, false);
         } catch (Throwable t) {
             handleSubClassException(t, "lifecycleBase.initFail", toString());
         }
@@ -284,7 +276,7 @@ public abstract class LifecycleBase implements Lifecycle {
 
             return;
         }
-
+        //新建状态直接设置为stopped
         if (state.equals(LifecycleState.NEW)) {
             state = LifecycleState.STOPPED;
             return;

@@ -55,14 +55,18 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
     protected static final StringManager sm =
             StringManager.getManager(AbstractHttp11Protocol.class);
 
+    //http请求的压缩配置。
     private final CompressionConfig compressionConfig = new CompressionConfig();
 
 
     public AbstractHttp11Protocol(AbstractEndpoint<S> endpoint) {
         super(endpoint);
+        //链接超时时间60s
         setConnectionTimeout(Constants.DEFAULT_CONNECTION_TIMEOUT);
+        //链接处理器
         ConnectionHandler<S> cHandler = new ConnectionHandler<>(this);
         setHandler(cHandler);
+        //设置连接处理器
         getEndpoint().setHandler(cHandler);
     }
 
@@ -73,6 +77,7 @@ public abstract class AbstractHttp11Protocol<S> extends AbstractProtocol<S> {
     @Override
     public void init() throws Exception {
         for (UpgradeProtocol upgradeProtocol : upgradeProtocols) {
+            //协议的升级
             configureUpgradeProtocol(upgradeProtocol);
         }
         /**

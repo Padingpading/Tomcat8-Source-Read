@@ -40,10 +40,11 @@ import org.apache.tomcat.util.net.SSLHostConfig;
  * Read Request Headers 和 Wait for next Request 以及 SSL Handshake上面。详见上链接。
  */
 
-//
+//协议处理器
 public interface ProtocolHandler {
 
-    /**
+    /**适配servlet请求。
+     * tomcat的re和resp 适配servet的httpservetreq和httpdServetresp
      * Return the adapter associated with the protocol handler.
      * @return the adapter
      */
@@ -51,15 +52,13 @@ public interface ProtocolHandler {
 
 
     /**
-     * The adapter, used to call the connector.
-     *
-     * @param adapter The adapter to associate
+     * 设置适配器
      */
     public void setAdapter(Adapter adapter);
 
 
     /**
-     * The executor, provide access to the underlying thread pool.
+     *线程池 The executor, provide access to the underlying thread pool.
      *
      * @return The executor used to process requests
      */
@@ -139,7 +138,7 @@ public interface ProtocolHandler {
      */
     public boolean isSendfileSupported();
 
-
+    //ssl配置
     public void addSslHostConfig(SSLHostConfig sslHostConfig);
     public SSLHostConfig[] findSslHostConfigs();
 

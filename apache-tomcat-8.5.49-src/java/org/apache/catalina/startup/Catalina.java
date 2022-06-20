@@ -106,7 +106,7 @@ public class Catalina {
         Catalina.class.getClassLoader();
 
 
-    /**
+    /**Catalina对应的server。
      * The server component we are starting or stopping.
      */
     protected Server server = null;
@@ -277,7 +277,7 @@ public class Catalina {
     }
 
 
-    /**
+    /**解析xml文件Digester组件。server.xml
      * Create and configure the Digester we will be using for startup.
      * @return the main digester to parse server.xml
      */
@@ -671,7 +671,7 @@ public class Catalina {
         if(log.isInfoEnabled()) {
             log.info("Initialization processed in " + ((t2 - t1) / 1000000) + " ms");
         }
-    }
+     }
 
 
     /*
@@ -851,7 +851,7 @@ public class Catalina {
             log.info( "Catalina naming disabled");
             System.setProperty("catalina.useNaming", "false");
         } else {
-            System.setProperty("catalina.useNaming", "true");
+            System.setProperty("catalina.useN aming", "true");
             String value = "org.apache.naming";
             String oldValue =
                 System.getProperty(javax.naming.Context.URL_PKG_PREFIXES);

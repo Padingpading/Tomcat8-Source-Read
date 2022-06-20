@@ -70,12 +70,15 @@ public class Connector extends LifecycleMBeanBase  {
     public Connector() {
         this(null);
     }
-
+    
+    /**协议
+     */
     public Connector(String protocol) {
         setProtocol(protocol);
         // Instantiate protocol handler
         ProtocolHandler p = null;
         try {
+            //setProtocol设置的协议处理类
             Class<?> clazz = Class.forName(protocolHandlerClassName);
             p = (ProtocolHandler) clazz.getConstructor().newInstance();
         } catch (Exception e) {
@@ -84,7 +87,6 @@ public class Connector extends LifecycleMBeanBase  {
         } finally {
             this.protocolHandler = p;
         }
-
         if (Globals.STRICT_SERVLET_COMPLIANCE) {
             uriCharset = StandardCharsets.ISO_8859_1;
         } else {
@@ -220,7 +222,7 @@ public class Connector extends LifecycleMBeanBase  {
     protected boolean useIPVHosts = false;
 
 
-    /**
+    /**协议处理类,默认Http11NioProtocol
      * Coyote Protocol handler class name.
      * Defaults to the Coyote HTTP/1.1 protocolHandler.
      */
@@ -228,7 +230,7 @@ public class Connector extends LifecycleMBeanBase  {
         "org.apache.coyote.http11.Http11NioProtocol";
 
 
-    /**
+    /**默认Http11NioProtocol
      * Coyote protocol handler.
      */
     protected final ProtocolHandler protocolHandler;
@@ -582,13 +584,14 @@ public class Connector extends LifecycleMBeanBase  {
 
         boolean aprConnector = AprLifecycleListener.isAprAvailable() &&
                 AprLifecycleListener.getUseAprConnector();
-
+        //http协议
         if ("HTTP/1.1".equals(protocol) || protocol == null) {
             if (aprConnector) {
                 setProtocolHandlerClassName("org.apache.coyote.http11.Http11AprProtocol");
             } else {
                 setProtocolHandlerClassName("org.apache.coyote.http11.Http11NioProtocol");
             }
+            //ajp协议
         } else if ("AJP/1.3".equals(protocol)) {
             if (aprConnector) {
                 setProtocolHandlerClassName("org.apache.coyote.ajp.AjpAprProtocol");

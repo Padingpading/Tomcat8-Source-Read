@@ -98,7 +98,7 @@ public class StringCache {
     /**
      * Cache for char chunk.
      */
-    protected static volatile CharEntry[] ccCache = null;
+     protected static volatile CharEntry[] ccCache = null;
 
 
     /**

@@ -83,7 +83,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
     private int nameIndex = 0;
 
 
-    /**
+    /**端点 nio的实现,封装socket。
      * Endpoint that provides low-level network I/O - must be matched to the
      * ProtocolHandler implementation (ProtocolHandler using NIO, requires NIO
      * Endpoint etc.).
@@ -106,6 +106,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
 
     public AbstractProtocol(AbstractEndpoint<S> endpoint) {
         this.endpoint = endpoint;
+        //?
         setSoLinger(Constants.DEFAULT_CONNECTION_LINGER);
         setTcpNoDelay(Constants.DEFAULT_TCP_NO_DELAY);
     }
@@ -479,7 +480,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
      * Create and configure a new Processor instance for the current protocol
      * implementation.
      *
-     * 子类去创建对应的处理器.
+     * 子类去创建对应的处理器,处理socket
      * {@link AbstractHttp11Protocol#createProcessor()}
      * @return A fully configured Processor instance that is ready to use
      */
@@ -568,7 +569,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         if (getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.init", getName()));
         }
-
+        //过
         if (oname == null) {
             // Component not pre-registered so register it
             oname = createObjectName();
@@ -582,7 +583,6 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
             Registry.getRegistry(null, null).registerComponent(
                     getHandler().getGlobal(), rgOname, null);
         }
-
         String endpointName = getName();
         endpoint.setName(endpointName.substring(1, endpointName.length()-1));
         endpoint.setDomain(domain);
@@ -645,7 +645,7 @@ public abstract class AbstractProtocol<S> implements ProtocolHandler,
         if(getLog().isInfoEnabled()) {
             getLog().info(sm.getString("abstractProtocolHandler.stop", getName()));
         }
-
+        //定时关闭超时的socket任务,停止
         if (asyncTimeout != null) {
             asyncTimeout.stop();
         }

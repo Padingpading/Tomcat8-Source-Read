@@ -10,15 +10,15 @@
     <welcome-file>default.jsp</welcome-file>
   </welcome-file-list>
   <display-name>Welcome to Tomcat</display-name>
-    <description>
-       1111111111
-    </description>
-    <servlet>
-          <servlet-name>FirstServlet</servlet-name>
-          <servlet-class>FirstServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-          <servlet-name>FirstServlet</servlet-name>
-          <url-pattern>TestTomcatServlet/FirstServlet</url-pattern>
-    </servlet-mapping>
+       <description>
+       1111111111
+       </description>
+   <servlet>
+   <servlet-name>FirstServlet</servlet-name>
+  <servlet-class>FirstServlet</servlet-class>
+   </servlet>
+   <servlet-mapping>
+   <servlet-name>FirstServlet</servlet-name>
+    <url-pattern>TestTomcatServlet/FirstServlet</url-pattern>
+   </servlet-mapping>
 </web-app>

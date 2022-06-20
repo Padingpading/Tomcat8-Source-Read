@@ -66,6 +66,10 @@
          APR (HTTP/AJP) Connector: /docs/apr.html
          Define a non-SSL/TLS HTTP/1.1 Connector on port 8080
     -->
+    <!--port:监听的端口-->
+    <!--protocol:协议的版本-->
+    <!--connectionTimeout:超时时间-->
+    <!--URIEncoding:编码-->
     <Connector port="8080" protocol="HTTP/1.1"
                connectionTimeout="20000"
                redirectPort="8443"
@@ -172,6 +176,8 @@
                resourceName="UserDatabase"/>
       </Realm>
 
+      <!--webapps:应用所在的文件夹-->
+      <!--unpackWARs:是否解压war-->
       <Host name="localhost"  appBase="webapps"
             unpackWARs="true" autoDeploy="true">
 
@@ -184,6 +190,7 @@
         <!-- Access log processes all example.
              Documentation at: /docs/config/valve.html
              Note: The pattern used is equivalent to using pattern="common" -->
+        <!--阀门,记录日志-->
         <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
                prefix="localhost_access_log" suffix=".txt"
                pattern="%h %l %u %t &quot;%r&quot; %s %b" />

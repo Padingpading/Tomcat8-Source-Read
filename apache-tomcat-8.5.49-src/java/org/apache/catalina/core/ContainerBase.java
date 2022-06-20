@@ -141,7 +141,17 @@ import org.apache.tomcat.util.res.StringManager;
  */
 public abstract class ContainerBase extends LifecycleMBeanBase
         implements Container { //LifecycleMBeanBase and Container
-
+    
+    
+    /**
+     * Associated logger name.
+     */
+    protected String logName = null;
+    
+    
+    protected Log logger = null;
+    
+    
     private static final Log log = LogFactory.getLog(ContainerBase.class);
 
     /**
@@ -168,14 +178,29 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
 
     // ----------------------------------------------------- Instance Variables
-
-
+    
     /**
+     * The human-readable name of this Container.
+     */
+    protected String name = null;
+    
+    /**父容器
+     */
+    protected Container parent = null;
+    
+    
+    /**当前容器的子容器
      * The child Containers belonging to this Container, keyed by name.
      */
     protected final HashMap<String, Container> children = new HashMap<>();
 
 
+
+    /**当前容器的监听器。
+     */
+    protected final List<ContainerListener> listeners = new CopyOnWriteArrayList<>();
+    
+    
     /**
      * The processor delay for this component.
      */
@@ -183,42 +208,11 @@ public abstract class ContainerBase extends LifecycleMBeanBase
 
 
     /**
-     * The container event listeners for this Container. Implemented as a
-     * CopyOnWriteArrayList since listeners may invoke methods to add/remove
-     * themselves or other listeners and with a ReadWriteLock that would trigger
-     * a deadlock.
-     */
-    protected final List<ContainerListener> listeners = new CopyOnWriteArrayList<>();
-
-    /**
-     * The Logger implementation with which this Container is associated.
-     */
-    protected Log logger = null;
-
-
-    /**
-     * Associated logger name.
-     */
-    protected String logName = null;
-
-
-    /**
      * The cluster with which this Container is associated.
      */
     protected Cluster cluster = null;
+    
     private final ReadWriteLock clusterLock = new ReentrantReadWriteLock();
-
-
-    /**
-     * The human-readable name of this Container.
-     */
-    protected String name = null;
-
-
-    /**
-     * The parent Container to which this Container is a child.
-     */
-    protected Container parent = null;
 
 
     /**
