@@ -87,7 +87,6 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
     // -------------------------------------------------------------- Constants
 
-
     private static final Log log = LogFactory.getLog(NioEndpoint.class);
 
     /**
@@ -101,7 +100,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
      */
     private NioSelectorPool selectorPool = new NioSelectorPool();
 
-    /**
+    /**端口监听
      * Server socket "pointer".
      * ServerSocketChannel，用于监听客户端的连接，
      * 它是所有客户端连接的父管道。
@@ -109,6 +108,12 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
     private volatile ServerSocketChannel serverSock = null;
 
     /**
+     * The socket poller.
+     */
+    private Poller[] pollers = null;
+    private AtomicInteger pollerRotater = new AtomicInteger(0);
+
+    /**信号量,控制socket链接的个数
      *
      */
     private volatile CountDownLatch stopLatch = null;
@@ -174,14 +179,12 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
     private long selectorTimeout = 1000;
     public void setSelectorTimeout(long timeout){ this.selectorTimeout = timeout;}
     public long getSelectorTimeout(){ return this.selectorTimeout; }
-    /**
-     * The socket poller.
-     */
-    private Poller[] pollers = null;
-    private AtomicInteger pollerRotater = new AtomicInteger(0);
+
     /**
      * Return an available poller in true round robin fashion.
-     *
+     * 很明显，取余的方式揭示了获取Poller的方法。你可以理解为
+     * Poller会组成一个圆环，这样我们就可以通过不断递增获取
+     * 下一个Poller,但是数据会溢出所以我们要取绝对值
      * @return The next poller in sequence
      */
     public Poller getPoller0() {
@@ -230,7 +233,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
     // ----------------------------------------------- Public Lifecycle Methods
 
-    /**
+    /**Nio组件初始化
      * Initialize the endpoint.
      * 1.绑定ServerSocketChannel的端口和Ip。以及允许链接的数量默认为100.
      * 2.改变Channel的阻塞模式。
@@ -274,12 +277,11 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
          * 初始化Acceptor和Poller的线程数都是1.
          */
         if (acceptorThreadCount == 0) {
-            // FIXME: Doesn't seem to work that well with multiple accept threads
-            //多个线程的时候不能很好的去工作？
+            //Acceptor是用来处理新连接的
             acceptorThreadCount = 1;
         }
         if (pollerThreadCount <= 0) {
-            //minimum one poller thread
+            //Poller 用来处理I/O事件
             pollerThreadCount = 1;
         }
         setStopLatch(new CountDownLatch(pollerThreadCount));
@@ -488,6 +490,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             //禁止用阻塞，ARP的风格。我门要轮询他。
             socket.configureBlocking(false);
             Socket sock = socket.socket();
+            //给socket设置属性。
             socketProperties.setProperties(sock);
 
             NioChannel channel = nioChannels.pop();
@@ -511,9 +514,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                 channel.setIOChannel(socket);
                 channel.reset();
             }
-            /**
-             * 将NioChannel注册到Poller内。
-             */
+            //从Poller池中获取一个Poller(按照次序获取,可以理解为一个圆环)，并将Channel注册到上面
             getPoller0().register(channel);
         } catch (Throwable t) {
             ExceptionUtils.handleThrowable(t);
@@ -547,7 +548,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
 
 
     // --------------------------------------------------- Acceptor Inner Class
-    /**
+    /** 用于接收新连接，每个Acceptor一个线程，以阻塞的方式接收新连接
      * The background thread that listens for incoming TCP/IP connections and
      * hands them off to an appropriate processor.
      * 生产者消费者模型利用后台线程将TCP/IP请求传递给对应的处理器去处理.
@@ -566,13 +567,9 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
             log.info("NioEndPoint -> Acceptor -> run() -> start!");
             int errorDelay = 0;
             log.info("NioEndPoint -> Acceptor -> run() -> running state is : " + running);
-            // Loop until we receive a shutdown command
+            //EndPoint状态初始化的时候为NEW.
             while (running) {
-
-                // Loop if endpoint is paused
-                /**
-                 * 自旋
-                 */
+                // 如果进入暂停状态则每隔一段时间检测一下
                 while (paused && running) {
                     state = AcceptorState.PAUSED;
                     try {
@@ -581,20 +578,21 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         // Ignore
                     }
                 }
-
+                // 再次检测
                 if (!running) {
                     break;
                 }
                 state = AcceptorState.RUNNING;
 
                 try {
-                    //if we have reached max connections, wait
-                    /**
+                    //检查是否达到最大连接数如果是则陷入等待，如果不是则增加当前连接数
+                    /**Aqs实现,控制线程通过的数量
                      * 当到达最大连接数的时候就等待。
                      * 点进源码看一看。
                      */
+                    //获取信号量
                     countUpOrAwaitConnection();
-
+                    //
                     SocketChannel socket = null;
                     try {
                         // Accept the next incoming connection from the server
@@ -608,7 +606,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
                         socket = serverSock.accept();
                         log.info("NioEndPoint -> Acceptor -> run() -> socket value is : " + socket.toString());
                     } catch (IOException ioe) {
-                        // We didn't get a socket
+                        //释放信号量
                         countDownConnection();
                         if (running) {
                             // Introduce delay if necessary
@@ -790,7 +788,7 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
         }
     }
 
-    /**
+    /** 当Acceptor接收到新连接，进行处理之后选择一个Poller处理该连接上的I/O事件。
      * Poller class.只有这个类是非阻塞。Acceptor和对应的Worker线程都是阻塞的。
      * 轮询器.(核心仍然在run方法内)
      * Acceptor获取到对应的Socket转换成NioChannel后注册到Poller内。
@@ -940,9 +938,6 @@ public class NioEndpoint extends AbstractJsseEndpoint<NioChannel> {
          */
         public void register(final NioChannel socket) {
             socket.setPoller(this);
-            /**
-             * 关注这里。
-             */
             NioSocketWrapper ka = new NioSocketWrapper(socket, NioEndpoint.this);
             socket.setSocketWrapper(ka);
             ka.setPoller(this);

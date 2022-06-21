@@ -1087,7 +1087,7 @@ public class StandardWrapper extends ContainerBase
                 }
                 singleThreadModel = true;
             }
-
+            //初始化servlet
             initServlet(servlet);
 
             fireContainerEvent("load", this);
@@ -1141,6 +1141,7 @@ public class StandardWrapper extends ContainerBase
                     }
                 }
             } else {
+                //sevlet初始化
                 servlet.init(facade);
             }
 

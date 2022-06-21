@@ -134,8 +134,8 @@ public abstract class AbstractEndpoint<S> {
         UNBOUND, BOUND_ON_INIT, BOUND_ON_START, SOCKET_CLOSED_ON_STOP
     }
 
-    /**
-     * 定义接收器用于监听请求。
+    /**基类
+     * 定义接收器用于监听请求,的主要工作就是不断接收来自客户端的连接，在简单处理之后将该连接交给Poller处理
      * 子类包括NioEndPoint。
      */
     public abstract static class Acceptor implements Runnable {
@@ -159,7 +159,7 @@ public abstract class AbstractEndpoint<S> {
         public final AcceptorState getState() {
             return state;
         }
-
+        //线程名称
         private String threadName;
         protected final void setThreadName(final String threadName) {
             this.threadName = threadName;
@@ -180,6 +180,17 @@ public abstract class AbstractEndpoint<S> {
     }
 
     // ----------------------------------------------------------------- Fields
+    /**监听的端口
+     * Server socket port.
+     */
+    private int port;
+
+    /**Acceptor是用来处理新连接的,从Selector中获取事件
+     * Acceptor thread count.
+     * 用一个线程就足够。
+     */
+    protected int acceptorThreadCount = 1;
+
 
     /**
      * Running state of the endpoint.
@@ -447,17 +458,6 @@ public abstract class AbstractEndpoint<S> {
     }
 
 
-    /**
-     * Acceptor thread count.
-     * 用一个线程就足够。
-     */
-    protected int acceptorThreadCount = 1;
-
-    public void setAcceptorThreadCount(int acceptorThreadCount) {
-        this.acceptorThreadCount = acceptorThreadCount;
-    }
-    public int getAcceptorThreadCount() { return acceptorThreadCount; }
-
 
     /**
      * Priority of the acceptor threads.
@@ -524,14 +524,6 @@ public abstract class AbstractEndpoint<S> {
         this.internalExecutor = (executor == null);
     }
     public Executor getExecutor() { return executor; }
-
-
-    /**
-     * Server socket port.
-     */
-    private int port;
-    public int getPort() { return port; }
-    public void setPort(int port ) { this.port=port; }
 
 
     public final int getLocalPort() {
@@ -1413,6 +1405,18 @@ public abstract class AbstractEndpoint<S> {
      * @throws IOException If an error occurs closing the socket
      */
     protected abstract void doCloseServerSocket() throws IOException;
+
+
+    public int getPort() { return port; }
+    public void setPort(int port ) { this.port=port; }
+
+
+    public void setAcceptorThreadCount(int acceptorThreadCount) {
+        this.acceptorThreadCount = acceptorThreadCount;
+    }
+    public int getAcceptorThreadCount() { return acceptorThreadCount; }
+
+
 
 }
 

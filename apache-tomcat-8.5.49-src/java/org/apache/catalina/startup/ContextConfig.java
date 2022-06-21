@@ -773,7 +773,7 @@ public class ContextConfig implements LifecycleListener {
                     Boolean.valueOf(context.getXmlNamespaceAware())));
         }
 
-        //
+        //解析web.xml
         webConfig();
 
         // 添加JSP解析器,因为index.jsp需要加载。

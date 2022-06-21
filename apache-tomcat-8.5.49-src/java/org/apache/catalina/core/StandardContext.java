@@ -5178,7 +5178,7 @@ public class StandardContext extends ContainerBase
             }
 
             // Configure and call application event listeners
-            /**
+            /**监听器的执行。
              * 配置和调用监听器。
              */
             if (ok) {
